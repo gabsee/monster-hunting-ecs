@@ -1,7 +1,7 @@
 using Leopotam.Ecs;
 
 /// <summary>
-/// Utility class to provide all systems that should run in the given order.
+/// Utility class to provide all gameplay systems that should run in the given order.
 /// </summary>
 public static class GameSystems
 {
