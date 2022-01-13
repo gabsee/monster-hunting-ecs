@@ -8,7 +8,7 @@ public class ProjectileHitDetection : IEcsRunSystem
     private EcsFilter<Projectile, Position> m_projectilesFilter = null;
     private EcsFilter<ProjectileTarget, Position> m_targetsFilter = null;
     private EcsFilter<Player> m_playerFilter = null;
-    private EcsFilter<PlayerConfig> m_playerConfigFilter = null;
+    private EcsFilter<ProjectilesConfig> m_projectilesConfigFilter = null;
 
     public void Run()
     {
@@ -19,13 +19,13 @@ public class ProjectileHitDetection : IEcsRunSystem
             return;
         }
 
-        if (m_playerConfigFilter.IsEmpty())
+        if (m_projectilesConfigFilter.IsEmpty())
         {
-            Debug.LogError("Player config not found");
+            Debug.LogError("Projectiles config not found");
             return;
         }
 
-        ref PlayerConfig playerConfig = ref m_playerConfigFilter.Get1(0);
+        ref ProjectilesConfig projectilesConfig = ref m_projectilesConfigFilter.Get1(0);
         ref EcsEntity playerEntity = ref m_playerFilter.GetEntity(0);
 
         foreach (var projectileIdx in m_projectilesFilter)
@@ -38,7 +38,7 @@ public class ProjectileHitDetection : IEcsRunSystem
 
                 float distance = Vector3.Distance(projectilePosition.Value, targetPosition.Value);
 
-                if (distance > playerConfig.ProjectileHitDistance)
+                if (distance > projectilesConfig.ProjectileHitDistance)
                 {
                     continue;
                 }

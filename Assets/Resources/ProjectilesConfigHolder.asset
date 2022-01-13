@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fbd2f4a145944aacb1877aa03a8067b, type: 3}
-  m_Name: PlayerConfigHolder
+  m_Script: {fileID: 11500000, guid: ffa380e858cb24f72ad207cf80a61a77, type: 3}
+  m_Name: ProjectilesConfigHolder
   m_EditorClassIdentifier: 
   m_config:
-    m_playerPrefab: {fileID: 1438961038639676018, guid: fdafe8af2930943d684d9b14022d5b50, type: 3}
-    m_playerSpeedMps: 5
-    m_playerYRotationSpeed: 40
-    m_playerXRotationSpeed: 20
+    m_projectilePrefab: {fileID: 5918416282917827580, guid: b6847996f710641679999aa3d8b39e38, type: 3}
+    m_projectileSpeedMps: 25
+    m_projectileHitDistance: 2
+    m_projectileLifetime: 4

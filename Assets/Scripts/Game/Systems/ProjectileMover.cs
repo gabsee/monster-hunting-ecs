@@ -9,7 +9,7 @@ public class ProjectileMover : IEcsRunSystem
 {
     // Auto-injected fields
     private EcsFilter<Projectile, Position, Rotation> m_projectilesFilter = null;
-    private EcsFilter<PlayerConfig> m_playerConfigFilter = null;
+    private EcsFilter<ProjectilesConfig> m_projectilesConfigFilter = null;
 
     public void Run()
     {
@@ -18,13 +18,13 @@ public class ProjectileMover : IEcsRunSystem
             return;
         }
 
-        if (m_playerConfigFilter.IsEmpty())
+        if (m_projectilesConfigFilter.IsEmpty())
         {
-            Debug.LogError("Player config not found");
+            Debug.LogError("Projectiles config not found");
             return;
         }
 
-        ref PlayerConfig playerConfig = ref m_playerConfigFilter.Get1(0);
+        ref ProjectilesConfig projectilesConfig = ref m_projectilesConfigFilter.Get1(0);
 
         var deltaTime = Time.deltaTime;
 
@@ -35,7 +35,7 @@ public class ProjectileMover : IEcsRunSystem
 
             Vector3 forward = projectileRotation.Value * Vector3.forward;
 
-            projectilePosition.Value += forward * playerConfig.ProjectileSpeedMps * deltaTime;
+            projectilePosition.Value += forward * projectilesConfig.ProjectileSpeedMps * deltaTime;
         }
     }
 }
