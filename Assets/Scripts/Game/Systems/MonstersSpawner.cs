@@ -29,9 +29,9 @@ public class MonstersSpawner : IEcsInitSystem
             var position = new Position()
             {
                 Value = new Vector3(
-                    Random.Range(0f, 100f),
+                    Random.Range(monsterConfig.MonsterSpawnMinPosition.x, monsterConfig.MonsterSpawnMaxPosition.x),
                     0f,
-                    Random.Range(0f, 100f)
+                    Random.Range(monsterConfig.MonsterSpawnMinPosition.y, monsterConfig.MonsterSpawnMaxPosition.y)
                 )
             };
             monsterEntity.Replace<Position>(position);
@@ -45,9 +45,9 @@ public class MonstersSpawner : IEcsInitSystem
             var rotateAround = new RotateAround()
             {
                 Point = position.Value + new Vector3(
-                    Random.Range(-5f, 5f),
+                    Random.Range(monsterConfig.MonsterMinDistanceToRotationPoint, monsterConfig.MonsterMaxDistanceToRotationPoint),
                     0f,
-                    Random.Range(-5f, 5f)
+                    Random.Range(monsterConfig.MonsterMinDistanceToRotationPoint, monsterConfig.MonsterMaxDistanceToRotationPoint)
                 ),
                 DegreesPerSecond = monsterConfig.MonsterSpeedDegreesPerSecond
             };

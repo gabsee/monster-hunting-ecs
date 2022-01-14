@@ -17,3 +17,6 @@ MonoBehaviour:
     m_playerSpeedMps: 5
     m_playerYRotationSpeed: 40
     m_playerXRotationSpeed: 20
+    m_playerSpawnMinPosition: {x: 25, y: 25}
+    m_playerSpawnMaxPosition: {x: 75, y: 75}
+    m_playerHeight: 1.5

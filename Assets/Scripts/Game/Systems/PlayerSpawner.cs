@@ -28,9 +28,9 @@ public class PlayerSpawner : IEcsInitSystem
         var position = new Position()
         {
             Value = new Vector3(
-                Random.Range(25f, 75f),
-                1.5f,
-                Random.Range(25f, 75f)
+                Random.Range(playerConfig.PlayerSpawnMinPosition.x, playerConfig.PlayerSpawnMaxPosition.x),
+                playerConfig.PlayerHeight,
+                Random.Range(playerConfig.PlayerSpawnMinPosition.y, playerConfig.PlayerSpawnMaxPosition.y)
             )
         };
         playerEntity.Replace<Position>(position);

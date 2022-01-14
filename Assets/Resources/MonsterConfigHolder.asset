@@ -16,3 +16,7 @@ MonoBehaviour:
     m_monstersCount: 5
     m_monsterPrefab: {fileID: 1438961038639676018, guid: 8bf1f7c8cce0d4085b20b2d079b23d8f, type: 3}
     m_monsterSpeedDegreesPerSecond: 45
+    m_monsterSpawnMinPosition: {x: 10, y: 10}
+    m_monsterSpawnMaxPosition: {x: 90, y: 90}
+    m_monsterMinDistanceToRotationPoint: 2
+    m_monsterMaxDistanceToRotationPoint: 7
