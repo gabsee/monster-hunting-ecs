@@ -2,11 +2,7 @@ using System;
 
 using UnityEngine;
 
-using Leopotam.Ecs;
-
-#if UNITY_EDITOR
-using Leopotam.Ecs.UnityIntegration;
-#endif   
+using SimpleECS;
 
 /// <summary>
 /// Entry point of the game.
@@ -14,8 +10,9 @@ using Leopotam.Ecs.UnityIntegration;
 /// </summary>
 public static class Main
 {
-    private static EcsWorld m_world;
-    private static EcsSystems m_systems;
+    public static World World { get; private set; }
+
+    private static Systems m_systems;
     private static GameObject m_systemsUpdaterGameObject;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -30,23 +27,15 @@ public static class Main
 
     private static void CreateWorld()
     {
-        m_world = new EcsWorld();
-
-#if UNITY_EDITOR
-        EcsWorldObserver.Create(m_world);
-#endif
+        World = World.Create();
     }
 
     private static void CreateSystems()
     {
-        m_systems = new EcsSystems(m_world);
-        m_systems.AddCoreSystems();
-        m_systems.AddGameSystems();
-        m_systems.Init();
-
-#if UNITY_EDITOR
-        EcsSystemsObserver.Create(m_systems);
-#endif   
+        m_systems = new Systems();
+        m_systems.Add<CoreSystems>();
+        m_systems.Add<GameSystems>();
+        m_systems.Initialize();
     }
 
     private static void CreateSystemsRunner()
@@ -60,7 +49,7 @@ public static class Main
 
     private static void Run()
     {
-        m_systems.Run();
+        m_systems.Execute();
     }
 
     private static void Stop()
@@ -68,11 +57,9 @@ public static class Main
         GameObject.Destroy(m_systemsUpdaterGameObject);
         m_systemsUpdaterGameObject = null;
 
-        m_systems.Destroy();
         m_systems = null;
 
-        m_world.Destroy();
-        m_world = null;
+        World.Destroy();
     }
 
     private class SystemsUpdater : MonoBehaviour

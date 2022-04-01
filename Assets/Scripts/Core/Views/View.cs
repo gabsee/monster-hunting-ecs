@@ -1,6 +1,6 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Mandatory element on all view prefabs.
@@ -8,16 +8,16 @@ using Leopotam.Ecs;
 /// </summary>
 public class View : MonoBehaviour
 {
-    private EcsEntity m_entity;
+    private Entity m_entity;
 
-    public void Link(EcsEntity p_entity)
+    public void Link(in Entity p_entity)
     {
         m_entity = p_entity;
     }
 
     private void Update()
     {
-        if (!m_entity.IsAlive())
+        if (!m_entity.IsValid())
         {
             GameObject.Destroy(this.gameObject);
         }

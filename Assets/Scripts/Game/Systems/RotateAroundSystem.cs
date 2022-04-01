@@ -1,36 +1,32 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Move entities with RotateAround component to make them rotate around a 3D point.
 /// </summary>
-public class RotateAroundSystem : IEcsRunSystem
+public class RotateAroundSystem : BaseSystem
 {
-    // Auto-injected fields
-    private EcsWorld m_world = null;
-    private EcsFilter<Position, RotateAround> m_filter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<Position>()
+        .Has<RotateAround>();
 
-    public void Run()
+    public override void Execute()
     {
-        if (m_filter.IsEmpty())
-        {
-            return;
-        }
-
         var deltaTime = Time.deltaTime;
 
-        foreach (var entityIdx in m_filter)
-        {
-            ref Position position = ref m_filter.Get1(entityIdx);
-            ref RotateAround rotateAround = ref m_filter.Get2(entityIdx);
+        m_query.Foreach(entity =>
+            {
+                ref Position position = ref entity.Get<Position>();
+                ref RotateAround rotateAround = ref entity.Get<RotateAround>();
 
-            Vector3 centerToPos = position.Value - rotateAround.Point;
-            float rotationAngle = deltaTime * rotateAround.DegreesPerSecond;
-            Quaternion rotation = Quaternion.Euler(0, rotationAngle, 0);
-            centerToPos = rotation * centerToPos;
+                Vector3 centerToPos = position.Value - rotateAround.Point;
+                float rotationAngle = deltaTime * rotateAround.DegreesPerSecond;
+                Quaternion rotation = Quaternion.Euler(0, rotationAngle, 0);
+                centerToPos = rotation * centerToPos;
 
-            position.Value = rotateAround.Point + centerToPos;
-        }
+                position.Value = rotateAround.Point + centerToPos;
+            }
+        );
     }
 }

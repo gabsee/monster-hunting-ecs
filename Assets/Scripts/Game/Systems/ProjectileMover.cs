@@ -1,41 +1,32 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Moves projectile entities.
 /// </summary>
-public class ProjectileMover : IEcsRunSystem
+public class ProjectileMover : BaseSystem
 {
-    // Auto-injected fields
-    private EcsFilter<Projectile, Position, Rotation> m_projectilesFilter = null;
-    private EcsFilter<ProjectilesConfig> m_projectilesConfigFilter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<Projectile>()
+        .Has<Position>()
+        .Has<Rotation>();
 
-    public void Run()
+    public override void Execute()
     {
-        if (m_projectilesFilter.IsEmpty())
-        {
-            return;
-        }
-
-        if (m_projectilesConfigFilter.IsEmpty())
-        {
-            Debug.LogError("Projectiles config not found");
-            return;
-        }
-
-        ref ProjectilesConfig projectilesConfig = ref m_projectilesConfigFilter.Get1(0);
+        ProjectilesConfig projectilesConfig = Main.World.GetData<ProjectilesConfig>();
 
         var deltaTime = Time.deltaTime;
 
-        foreach (var entityIdx in m_projectilesFilter)
-        {
-            ref Position projectilePosition = ref m_projectilesFilter.Get2(entityIdx);
-            ref Rotation projectileRotation = ref m_projectilesFilter.Get3(entityIdx);
+        m_query.Foreach(entity =>
+            {
+                ref Position projectilePosition = ref entity.Get<Position>();
+                ref Rotation projectileRotation = ref entity.Get<Rotation>();
 
-            Vector3 forward = projectileRotation.Value * Vector3.forward;
+                Vector3 forward = projectileRotation.Value * Vector3.forward;
 
-            projectilePosition.Value += forward * projectilesConfig.ProjectileSpeedMps * deltaTime;
-        }
+                projectilePosition.Value += forward * projectilesConfig.ProjectileSpeedMps * deltaTime;
+            }
+        );
     }
 }

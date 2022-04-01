@@ -1,21 +1,19 @@
-using Leopotam.Ecs;
-
 /// <summary>
-/// Utility class to provide all gameplay systems that should run in the given order.
+/// Provide all gameplay systems that should run in the given order.
 /// </summary>
-public static class GameSystems
+public class GameSystems : Systems
 {
-    public static EcsSystems AddGameSystems(this EcsSystems p_systems)
+    public GameSystems()
     {
-        return p_systems
-            .Add(new PlayerSpawner())
-            .Add(new PlayerController())
-            .Add(new MonstersSpawner())
-            .Add(new RotateAroundSystem())
-            .Add(new ProjectileCreator())
-            .Add(new ProjectileMover())
-            .Add(new ProjectileHitDetection())
-            .Add(new ProjectileLifetimeHandler())
-            .Add(new ViewUpdaterSystem<Score>());
+        Add<PlayerSpawner>();
+        Add<PlayerController>();
+        Add<MonstersSpawner>();
+        Add<RotateAroundSystem>();
+        Add<ProjectileCreator>();
+        Add<ProjectileMover>();
+        Add<ProjectileHitDetection>();
+        Add<PlayerScoreComputer>();
+        Add<ProjectileLifetimeHandler>();
+        Add<ViewUpdaterSystem<Score>>();
     }
 }

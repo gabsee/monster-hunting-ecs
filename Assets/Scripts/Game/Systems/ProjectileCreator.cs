@@ -1,22 +1,22 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Creates projectile entity based on ProjectilesConfig
 /// when shoot input action is triggered.
 /// </summary>
-public class ProjectileCreator : IEcsInitSystem, IEcsRunSystem
+public class ProjectileCreator : BaseSystem
 {
-    // Auto-injected fields
-    private EcsWorld m_world = null;
-    private EcsFilter<Player, Position, Rotation> m_playerFilter = null;
-    private EcsFilter<ProjectilesConfig> m_projectilesConfigFilter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<Player>()
+        .Has<Position>()
+        .Has<Rotation>();
 
     private InputsActions m_inputActions;
     private bool m_shoot;
 
-    public void Init()
+    public override void Initialize()
     {
         m_inputActions = new InputsActions();
         m_inputActions.Enable();
@@ -24,7 +24,7 @@ public class ProjectileCreator : IEcsInitSystem, IEcsRunSystem
         m_inputActions.Combat.Shoot.started += _ => m_shoot = true;
     }
 
-    public void Run()
+    public override void Execute()
     {
         if (!m_shoot)
         {
@@ -32,34 +32,32 @@ public class ProjectileCreator : IEcsInitSystem, IEcsRunSystem
         }
         m_shoot = false;
 
-        if (Cursor.lockState == CursorLockMode.None ||
-            m_playerFilter.IsEmpty())
+        if (Cursor.lockState == CursorLockMode.None)
         {
             return;
         }
 
-        if (m_projectilesConfigFilter.IsEmpty())
-        {
-            Debug.LogError("Projectiles config not found");
-            return;
-        }
+        ProjectilesConfig projectilesConfig = Main.World.GetData<ProjectilesConfig>();
 
-        ref ProjectilesConfig projectilesConfig = ref m_projectilesConfigFilter.Get1(0);
+        m_query.Foreach(entity =>
+            {
+                ref Position playerPosition = ref entity.Get<Position>();
+                ref Rotation playerRotation = ref entity.Get<Rotation>();
 
-        ref Position playerPosition = ref m_playerFilter.Get2(0);
-        ref Rotation playerRotation = ref m_playerFilter.Get3(0);
+                Vector3 playerForward = playerRotation.Value * Vector3.forward;
 
-        Vector3 playerForward = playerRotation.Value * Vector3.forward;
+                Vector3 projectilePosition = playerPosition.Value + playerForward;
+                Quaternion projectileRotation = playerRotation.Value;
 
-        Vector3 projectilePosition = playerPosition.Value + playerForward;
-        Quaternion projectileRotation = playerRotation.Value;
+                float destroyTime = Time.time + projectilesConfig.ProjectileLifetime;
 
-        float destroyTime = Time.time + projectilesConfig.ProjectileLifetime;
-
-        EcsEntity projectileEntity = m_world.NewEntity();
-        projectileEntity.Replace<Projectile>(new Projectile() { DestroyTime = destroyTime });
-        projectileEntity.Replace<Position>(new Position() { Value = projectilePosition });
-        projectileEntity.Replace<Rotation>(new Rotation() { Value = projectileRotation });
-        projectileEntity.Replace<ViewPrefab>(new ViewPrefab() { Prefab = projectilesConfig.ProjectilePrefab });
+                Entity projectileEntity = Main.World.CreateEntity(
+                    new Projectile() { DestroyTime = destroyTime },
+                    new Position() { Value = projectilePosition },
+                    new Rotation() { Value = projectileRotation },
+                    new ViewPrefab() { Prefab = projectilesConfig.ProjectilePrefab }
+                );
+            }
+        );
     }
 }

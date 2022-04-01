@@ -1,57 +1,44 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
-public class ProjectileHitDetection : IEcsRunSystem
+/// <summary>
+/// Detect if a projectile is near a target, destroys the target and the projectile if it happens.
+/// </summary>
+public class ProjectileHitDetection : BaseSystem
 {
-    // Auto-injected fields
-    private EcsFilter<Projectile, Position> m_projectilesFilter = null;
-    private EcsFilter<ProjectileTarget, Position> m_targetsFilter = null;
-    private EcsFilter<Player> m_playerFilter = null;
-    private EcsFilter<ProjectilesConfig> m_projectilesConfigFilter = null;
+    private Query m_projectilesQuery = Main.World.CreateQuery()
+        .Has<Projectile>()
+        .Has<Position>();
 
-    public void Run()
+    private Query m_targetsQuery = Main.World.CreateQuery()
+        .Has<ProjectileTarget>()
+        .Has<Position>();
+
+    public override void Execute()
     {
-        if (m_projectilesFilter.IsEmpty() ||
-            m_targetsFilter.IsEmpty() ||
-            m_playerFilter.IsEmpty())
-        {
-            return;
-        }
+        ProjectilesConfig projectilesConfig = Main.World.GetData<ProjectilesConfig>();
 
-        if (m_projectilesConfigFilter.IsEmpty())
-        {
-            Debug.LogError("Projectiles config not found");
-            return;
-        }
-
-        ref ProjectilesConfig projectilesConfig = ref m_projectilesConfigFilter.Get1(0);
-        ref EcsEntity playerEntity = ref m_playerFilter.GetEntity(0);
-
-        foreach (var projectileIdx in m_projectilesFilter)
-        {
-            ref Position projectilePosition = ref m_projectilesFilter.Get2(projectileIdx);
-
-            foreach (var targetIdx in m_targetsFilter)
+        m_projectilesQuery.Foreach(projectileEntity =>
             {
-                ref Position targetPosition = ref m_targetsFilter.Get2(targetIdx);
+                Position projectilePosition = projectileEntity.Get<Position>();
 
-                float distance = Vector3.Distance(projectilePosition.Value, targetPosition.Value);
+                m_targetsQuery.Foreach(targetEntity =>
+                    {
+                        Position targetPosition = targetEntity.Get<Position>();
 
-                if (distance > projectilesConfig.ProjectileHitDistance)
-                {
-                    continue;
-                }
+                        float distance = Vector3.Distance(projectilePosition.Value, targetPosition.Value);
 
-                m_projectilesFilter.GetEntity(projectileIdx).Destroy();
-                m_targetsFilter.GetEntity(targetIdx).Destroy();
+                        if (distance > projectilesConfig.ProjectileHitDistance)
+                        {
+                            return;
+                        }
 
-                int score = playerEntity.Has<Score>() ?
-                    playerEntity.Get<Score>().Value + 1 :
-                    1;
-
-                playerEntity.Replace<Score>(new Score() { Value = score });
+                        projectileEntity.Set<Destroy>(new Destroy());
+                        targetEntity.Set<Destroy>(new Destroy());
+                    }
+                );
             }
-        }
+        );
     }
 }

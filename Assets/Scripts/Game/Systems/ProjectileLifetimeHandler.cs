@@ -1,35 +1,30 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Destroys a projectile entity when its lifetime is over.
 /// </summary>
-public class ProjectileLifetimeHandler : IEcsRunSystem
+public class ProjectileLifetimeHandler : BaseSystem
 {
-    // Auto-injected field
-    private EcsFilter<Projectile> m_projectilesFilter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<Projectile>();
 
-    public void Run()
+    public override void Execute()
     {
-        if (m_projectilesFilter.IsEmpty())
-        {
-            return;
-        }
-
         var time = Time.time;
 
-        foreach (var entityIdx in m_projectilesFilter)
-        {
-            ref Projectile projectile = ref m_projectilesFilter.Get1(entityIdx);
-
-            if (projectile.DestroyTime > time)
+        m_query.Foreach(entity =>
             {
-                continue;
-            }
+                ref Projectile projectile = ref entity.Get<Projectile>();
 
-            ref EcsEntity projectileEntity = ref m_projectilesFilter.GetEntity(entityIdx);
-            projectileEntity.Destroy();
-        }
+                if (projectile.DestroyTime > time)
+                {
+                    return;
+                }
+
+                entity.Set<Destroy>(new Destroy());
+            }
+        );
     }
 }

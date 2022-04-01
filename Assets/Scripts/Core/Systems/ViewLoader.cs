@@ -1,43 +1,39 @@
 using UnityEngine;
 
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Creates an instance of the prefab view in the scene for entities with ViewPrefab component.
 /// </summary>
-public class ViewLoader : IEcsRunSystem
+public class ViewLoader : BaseSystem
 {
-    // Auto-injected field
-    private EcsFilter<ViewPrefab>.Exclude<ViewInstance> m_filter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<ViewPrefab>()
+        .Not<ViewInstance>();
 
-    public void Run()
+    public override void Execute()
     {
-        if (m_filter.IsEmpty())
-        {
-            return;
-        }
+        m_query.Foreach(entity =>
+            {
+                ref ViewPrefab viewPrefab = ref entity.Get<ViewPrefab>();
 
-        foreach (var entityIdx in m_filter)
-        {
-            ref ViewPrefab viewPrefab = ref m_filter.Get1(entityIdx);
-            ref EcsEntity entity = ref m_filter.GetEntity(entityIdx);
+                var instance = GameObject.Instantiate(viewPrefab.Prefab);
+                entity.Set<ViewInstance>(
+                    new ViewInstance()
+                    {
+                        Instance = instance
+                    }
+                );
 
-            var instance = GameObject.Instantiate(viewPrefab.Prefab);
-            entity.Replace<ViewInstance>(
-                new ViewInstance()
+                if (instance.TryGetComponent(out View view))
                 {
-                    Instance = instance
+                    view.Link(entity);
                 }
-            );
-
-            if (instance.TryGetComponent(out View view))
-            {
-                view.Link(entity);
+                else
+                {
+                    Debug.LogError($"Prefab {viewPrefab.Prefab.name} does not have View monobehaviour attached.");
+                }
             }
-            else
-            {
-                Debug.LogError($"Prefab {viewPrefab.Prefab.name} does not have View monobehaviour attached.");
-            }
-        }
+        );
     }
 }

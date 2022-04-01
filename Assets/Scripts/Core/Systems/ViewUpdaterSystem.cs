@@ -1,31 +1,28 @@
-using Leopotam.Ecs;
+using SimpleECS;
 
 /// <summary>
 /// Updates IView components on view gameobjects with values of associated components.
 /// </summary>
-public class ViewUpdaterSystem<TComponent> : IEcsRunSystem where TComponent : struct
+public class ViewUpdaterSystem<TComponent> : BaseSystem where TComponent : struct
 {
-    // Auto-injected field
-    private EcsFilter<ViewInstance, TComponent> m_filter = null;
+    private Query m_query = Main.World.CreateQuery()
+        .Has<ViewInstance>()
+        .Has<TComponent>();
 
-    public void Run()
+    public override void Execute()
     {
-        if (m_filter.IsEmpty())
-        {
-            return;
-        }
-
-        foreach (var entityIdx in m_filter)
-        {
-            ref ViewInstance viewInstance = ref m_filter.Get1(entityIdx);
-
-            if (!viewInstance.Instance.TryGetComponent(out IView<TComponent> componentView))
+        m_query.Foreach(entity =>
             {
-                continue;
-            }
+                ref ViewInstance viewInstance = ref entity.Get<ViewInstance>();
 
-            ref TComponent component = ref m_filter.Get2(entityIdx);
-            componentView.ComponentUpdate(ref component);
-        }
+                if (!viewInstance.Instance.TryGetComponent(out IView<TComponent> componentView))
+                {
+                    return;
+                }
+
+                ref TComponent component = ref entity.Get<TComponent>();
+                componentView.ComponentUpdate(ref component);
+            }
+        );
     }
 }
