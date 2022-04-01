@@ -1,4 +1,3 @@
-
 /// <summary>
 /// ECS System
 /// </summary>

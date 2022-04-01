@@ -1,8 +1,6 @@
 
 using UnityEngine;
 
-using SimpleECS;
-
 /// <summary>
 /// Foreach AConfigHolder in Resources, creates an entity with holded config as component
 /// </summary>

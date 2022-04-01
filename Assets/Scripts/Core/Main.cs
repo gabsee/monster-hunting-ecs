@@ -15,6 +15,10 @@ public static class Main
     private static Systems m_systems;
     private static GameObject m_systemsUpdaterGameObject;
 
+#if UNITY_EDITOR
+    private static EntitiesDebug m_entitiesDebug;
+#endif
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Start()
     {
@@ -28,6 +32,10 @@ public static class Main
     private static void CreateWorld()
     {
         World = World.Create();
+
+#if UNITY_EDITOR
+        m_entitiesDebug = new EntitiesDebug(World);
+#endif
     }
 
     private static void CreateSystems()
@@ -41,7 +49,7 @@ public static class Main
     private static void CreateSystemsRunner()
     {
         m_systemsUpdaterGameObject = new GameObject("[SystemsUpdater]");
-        m_systemsUpdaterGameObject.hideFlags = HideFlags.NotEditable;
+        m_systemsUpdaterGameObject.hideFlags = HideFlags.HideAndDontSave;
         GameObject.DontDestroyOnLoad(m_systemsUpdaterGameObject);
         var systemsUpdater = m_systemsUpdaterGameObject.AddComponent<SystemsUpdater>();
         systemsUpdater.OnUpdate += Run;
@@ -50,6 +58,10 @@ public static class Main
     private static void Run()
     {
         m_systems.Execute();
+
+#if UNITY_EDITOR
+        m_entitiesDebug.Update();
+#endif
     }
 
     private static void Stop()
@@ -60,6 +72,11 @@ public static class Main
         m_systems = null;
 
         World.Destroy();
+
+#if UNITY_EDITOR
+        m_entitiesDebug.Destroy();
+        m_entitiesDebug = null;
+#endif
     }
 
     private class SystemsUpdater : MonoBehaviour

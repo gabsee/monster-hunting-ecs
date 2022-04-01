@@ -1,5 +1,5 @@
-
 using SimpleECS;
+
 /// <summary>
 /// Increases player score for each destroyed target
 /// </summary>
